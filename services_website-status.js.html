@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: core/base-service/graphql</title>
+    <title>JSDoc: Source: services/website-status.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,272 +17,81 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: core/base-service/graphql</h1>
+    <h1 class="page-title">Source: services/website-status.js</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_base-service_graphql.js.html">core/base-service/graphql.js</a>, <a href="core_base-service_graphql.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~mergeQueries"><span class="type-signature">(inner) </span>mergeQueries<span class="signature">(&hellip;queries)</span><span class="type-signature"> &rarr; {object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Utility function to merge two graphql queries together
-This is basically copied from
-<a href="https://www.npmjs.com/package/graphql-query-merge">graphql-query-merge</a>
-but can't use that due to incorrect packaging.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>queries</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                    &lt;repeatable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>queries to merge</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_base-service_graphql.js.html">core/base-service/graphql.js</a>, <a href="core_base-service_graphql.js.html#line14">line 14</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>merged query</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Commonly used functions and utilities for tasks related to website status.
+ *
+ * @module
+ */
+
+import Joi from 'joi'
+
+/**
+ * Joi schema for validating query params.
+ * Checks if the query params obect has valid up_message, down_message, up_color and down_color properties.
+ *
+ * @type {Joi}
+ */
+const queryParamSchema = Joi.object({
+  up_message: Joi.string(),
+  down_message: Joi.string(),
+  up_color: Joi.alternatives(Joi.string(), Joi.number()),
+  down_color: Joi.alternatives(Joi.string(), Joi.number()),
+}).required()
+
+/**
+ * Example query param object.
+ * Contains up_message, down_message, up_color and down_color properties.
+ *
+ * @type {object}
+ */
+const exampleQueryParams = {
+  up_message: 'online',
+  up_color: 'blue',
+  down_message: 'offline',
+  down_color: 'lightgrey',
+}
+
+/**
+ * Creates a badge object that displays information about website status.
+ *
+ * @param {object} options - The options for rendering the status
+ * @param {boolean} options.isUp - Whether the website or service is up or down
+ * @param {string} [options.upMessage='up'] - The message to display when the website or service is up
+ * @param {string} [options.downMessage='down'] - The message to display when the website or service is down
+ * @param {string} [options.upColor='brightgreen'] - The color to use when the website or service is up
+ * @param {string} [options.downColor='red'] - The color to use when the website or service is down
+ * @returns {object} An object with a message and a color property
+ * @example
+ * renderWebsiteStatus({ isUp: true }) // returns { message: 'up', color: 'brightgreen' }
+ * renderWebsiteStatus({ isUp: false }) // returns { message: 'down', color: 'red' }
+ */
+function renderWebsiteStatus({
+  isUp,
+  upMessage = 'up',
+  downMessage = 'down',
+  upColor = 'brightgreen',
+  downColor = 'red',
+}) {
+  if (isUp) {
+    return { message: upMessage, color: upColor }
+  } else {
+    return { message: downMessage, color: downColor }
+  }
+}
+
+export { queryParamSchema, exampleQueryParams, renderWebsiteStatus }
+</code></pre>
+        </article>
+    </section>
 
 
 
