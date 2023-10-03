@@ -43,9 +43,19 @@ function assertNamesUnique(names, { message }) {
   }
 }
 
+const regex = new RegExp(`${serviceDir}/(.+)/`, 'g')
+const ALLOW_LIST = (process.env.ALLOWED_SERVICES || '').split(',')
+
+function isAllowed(s) {
+  for (const m of s.matchAll(regex)) {
+    if (ALLOW_LIST.includes(m[1])) return true
+  }
+  return false
+}
+
 async function loadServiceClasses(servicePaths) {
   if (!servicePaths) {
-    servicePaths = getServicePaths('*.service.js')
+    servicePaths = getServicePaths('*.service.js').filter(isAllowed)
   }
 
   const serviceClasses = []
