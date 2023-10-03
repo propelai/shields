@@ -2,6 +2,17 @@ public:
   bind:
     address: 'localhost'
 
+  services:
+    allowed:
+      - github
+      - static-badge
+      - nexus
+      - sonar
+      - metadata-hub
+
+    metadataHub:
+      baseUri: http://localhost:5000
+
   cors:
     allowedOrigin: ['http://localhost:3000']
 

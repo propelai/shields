@@ -1,3 +1,14 @@
 public:
   bind:
     address: '0.0.0.0'
+
+  services:
+    allowed:
+      - github
+      - static-badge
+      - nexus
+      - sonar
+      - metadata-hub
+
+    metadataHub:
+      baseUri: http://metadata-hub-beta.platform.cluster.local

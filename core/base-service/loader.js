@@ -2,10 +2,12 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { globSync } from 'glob'
 import countBy from 'lodash.countby'
+import configModule from 'config'
 import categories from '../../services/categories.js'
 import BaseService from './base.js'
 import { assertValidServiceDefinitionExport } from './service-definitions.js'
 
+const config = configModule.util.toObject()
 const serviceDir = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
@@ -44,11 +46,13 @@ function assertNamesUnique(names, { message }) {
 }
 
 const regex = new RegExp(`${serviceDir}/(.+)/`, 'g')
-const ALLOW_LIST = (process.env.ALLOWED_SERVICES || '').split(',')
 
 function isAllowed(s) {
   for (const m of s.matchAll(regex)) {
-    if (ALLOW_LIST.includes(m[1])) return true
+    if (config.public.services.allowed.includes(m[1])) {
+      console.log(m[1])
+      return true
+    }
   }
   return false
 }

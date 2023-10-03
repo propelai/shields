@@ -118,6 +118,10 @@ const publicConfigSchema = Joi.object({
     allowedOrigin: Joi.array().items(optionalUrl).required(),
   },
   services: Joi.object({
+    allowed: Joi.array().items(Joi.string()).required(),
+    metadataHub: {
+      baseUri: requiredUrl,
+    },
     bitbucketServer: defaultService,
     drone: defaultService,
     github: {
