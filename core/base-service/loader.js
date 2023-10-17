@@ -50,7 +50,7 @@ const regex = new RegExp(`${serviceDir}/(.+)/`, 'g')
 function isAllowed(s) {
   for (const m of s.matchAll(regex)) {
     if (config.public.services.allowed.includes(m[1])) {
-      console.log(m[1])
+      // console.log(m[1])
       return true
     }
   }

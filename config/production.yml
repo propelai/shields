@@ -11,4 +11,4 @@ public:
       - metadata-hub
 
     metadataHub:
-      baseUri: http://metadata-hub-beta.platform.cluster.local
+      baseUri: http://metadata-hub-beta.platform.svc.cluster.local
