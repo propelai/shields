@@ -1,5 +1,7 @@
 FROM node:18-alpine AS Builder
 
+ARG BASE_URL=https://shields-beta.platform.nosidelines.io
+
 RUN mkdir -p /usr/src/app
 RUN mkdir /usr/src/app/private
 WORKDIR /usr/src/app
@@ -14,7 +16,7 @@ RUN npm install -g "npm@^9.0.0"
 RUN NODE_ENV=development CYPRESS_INSTALL_BINARY=0 npm ci
 
 COPY . /usr/src/app
-RUN npm run build
+RUN BASE_URL=${BASE_URL} npm run build
 RUN npm prune --omit=dev
 RUN npm cache clean --force
 
