@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Tutorial: json-format</title>
+    <title>JSDoc: Source: services/thunderstore/thunderstore-base.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,39 +17,114 @@
 
 <div id="main">
 
-    <h1 class="page-title">Tutorial: json-format</h1>
+    <h1 class="page-title">Source: services/thunderstore/thunderstore-base.js</h1>
 
-    <section>
-
-<header>
     
 
-    <h2>json-format</h2>
-</header>
 
-<article>
-    <h1>JSON Format</h1>
-<p>Even though Shields is probably best known for its SVG badges, you can also retrieve
-a JSON payload by replacing the <code>.svg</code> extension with <code>.json</code>.</p>
-<p>For instance, hitting <a href="https://img.shields.io/badge/hello-world-brightgreen.json">this endpoint</a>
-will generate the following payload:</p>
-<pre class="prettyprint source"><code>{
-  &quot;name&quot;: &quot;hello&quot;,
-  &quot;label&quot;: &quot;hello&quot;,
-  &quot;value&quot;: &quot;world&quot;,
-  &quot;message&quot;: &quot;world&quot;,
-  &quot;color&quot;: &quot;brightgreen&quot;
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Joi from 'joi'
+import { BaseJsonService } from '../index.js'
+import { nonNegativeInteger } from '../validators.js'
+
+const packageSchema = Joi.object({
+  latest: Joi.object({
+    version_number: Joi.string().required(),
+  }).required(),
+}).required()
+
+const packageMetricsSchema = Joi.object({
+  downloads: nonNegativeInteger,
+  rating_score: nonNegativeInteger,
+})
+
+const documentation = `
+&lt;p>
+  The Thunderstore badges require a package's &lt;code>namespace&lt;/code> and &lt;code>name&lt;/code>.
+&lt;/p>
+&lt;p>
+  Everything can be discerned from your package's URL. Thunderstore package URLs have a mostly consistent
+  format:
+&lt;/p>
+&lt;p>
+    &lt;code>https://thunderstore.io/c/[community]/p/[namespace]/[packageName]&lt;/code>
+&lt;/p>
+&lt;p>
+  For example: &lt;code>https://thunderstore.io/c/lethal-company/p/notnotnotswipez/MoreCompany/&lt;/code>.
+  &lt;ul>
+    &lt;li>&lt;code>namespace = "notnotnotswipez"&lt;/code>&lt;/li>
+    &lt;li>&lt;code>packageName = "MoreCompany"&lt;/code>&lt;/li>
+  &lt;/ul>
+&lt;/p>
+&lt;details>
+  &lt;summary>Risk Of Rain 2&lt;/summary>
+  &lt;p>
+    The 'default community', Risk of Rain 2, has an alternative URL:
+  &lt;/p>
+  &lt;p>
+    &lt;code>https://thunderstore.io/package/[namespace]/[packageName]&lt;/code>
+  &lt;/p>
+&lt;/details>
+&lt;details>
+  &lt;summary>Subdomain Communities&lt;/summary>
+  &lt;p>
+    Some communities use a 'subdomain' alternative URL, for example, Valheim:
+  &lt;/p>
+  &lt;p>
+    &lt;code>https://valheim.thunderstore.io/package/[namespace]/[packageName]&lt;/code>
+  &lt;/p>
+&lt;/details>
+`
+
+/**
+ * Services which query Thunderstore endpoints should extend BaseThunderstoreService
+ *
+ * @abstract
+ */
+class BaseThunderstoreService extends BaseJsonService {
+  static thunderstoreGreen = '23FFB0'
+
+  /**
+   * Fetches package metadata from the Thunderstore API.
+   *
+   * @param {object} pkg - Package specifier
+   * @param {string} pkg.namespace - the package namespace
+   * @param {string} pkg.packageName - the package name
+   * @returns {Promise&lt;object>} - Promise containing validated package information
+   */
+  async fetchPackage({ namespace, packageName }) {
+    return this._requestJson({
+      schema: packageSchema,
+      url: `https://thunderstore.io/api/experimental/package/${namespace}/${packageName}`,
+    })
+  }
+
+  /**
+   * Fetches package metrics from the Thunderstore API.
+   *
+   * @param {object} pkg - Package specifier
+   * @param {string} pkg.namespace - the package namespace
+   * @param {string} pkg.packageName - the package name
+   * @returns {Promise&lt;object>} - Promise containing validated package metrics
+   */
+  async fetchPackageMetrics({ namespace, packageName }) {
+    return this._requestJson({
+      schema: packageMetricsSchema,
+      url: `https://thunderstore.io/api/v1/package-metrics/${namespace}/${packageName}`,
+    })
+  }
 }
-</code></pre>
-<p>Note that the values of the <code>name</code> and <code>value</code> fields are duplicates of the <code>label</code>
-and <code>message</code> ones, respectively. As of April 2019, <code>name</code> and <code>value</code> are deprecated
-and will be removed in a future release, please consider migrating your application
-to use <code>label</code> and <code>message</code> instead.</p>
-<p>Feel free to <a href="https://github.com/badges/shields/issues/new/choose">open an issue</a>
-if you have any queries regarding the JSON format.</p>
-</article>
 
-</section>
+export { BaseThunderstoreService, documentation }
+</code></pre>
+        </article>
+    </section>
+
+
+
 
 </div>
 
