@@ -132,6 +132,7 @@ const publicConfigSchema = Joi.object({
       },
       restApiVersion: Joi.date().raw().required(),
     },
+    gitea: defaultService,
     gitlab: defaultService,
     jira: defaultService,
     jenkins: Joi.object({
@@ -172,6 +173,7 @@ const privateConfigSchema = Joi.object({
   gh_client_id: Joi.string(),
   gh_client_secret: Joi.string(),
   gh_token: Joi.string(),
+  gitea_token: Joi.string(),
   gitlab_token: Joi.string(),
   jenkins_user: Joi.string(),
   jenkins_pass: Joi.string(),
@@ -189,6 +191,7 @@ const privateConfigSchema = Joi.object({
   obs_pass: Joi.string(),
   redis_url: Joi.string().uri({ scheme: ['redis', 'rediss'] }),
   opencollective_token: Joi.string(),
+  pepy_key: Joi.string(),
   postgres_url: Joi.string().uri({ scheme: 'postgresql' }),
   sentry_dsn: Joi.string(),
   sl_insight_userUuid: Joi.string(),
