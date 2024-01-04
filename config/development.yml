@@ -11,7 +11,7 @@ public:
       - metadata-hub
 
     metadataHub:
-      baseUri: http://localhost:5000
+      baseUri: http://127.0.0.1:5000
 
   cors:
     allowedOrigin: ['http://localhost:3000']

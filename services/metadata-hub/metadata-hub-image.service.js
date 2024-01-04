@@ -8,6 +8,14 @@ const config = configModule.util.toObject()
 
 const schema = Joi.object({
   image: Joi.string().required(),
+  vulnerabilities: Joi.object().required({
+    critical: Joi.number().required(),
+    high: Joi.number().required(),
+    low: Joi.number().required(),
+    medium: Joi.number().required(),
+    minimal: Joi.number().required(),
+    unspecified: Joi.number().required(),
+  }),
 }).required()
 
 const documentation = `
@@ -54,10 +62,11 @@ export default class MetadataHubImage extends BaseJsonService {
   static defaultBadgeData = { label: 'kubernetes' }
 
   // (10)
-  static render({ label, version }) {
+  static render({ label, version, versionFormatter }) {
     return renderVersionBadge({
       defaultLabel: label,
       version,
+      versionFormatter,
     })
   }
 
@@ -71,9 +80,20 @@ export default class MetadataHubImage extends BaseJsonService {
 
   // (8)
   async handle({ environment, container, project }, { label = 'kubernetes' }) {
-    const { image } = await this.fetch({ environment, container, project })
+    const { image, vulnerabilities } = await this.fetch({
+      environment,
+      container,
+      project,
+    })
     return this.constructor.render({
       version: image,
+      versionFormatter: () => {
+        if (vulnerabilities.critical > 0) return 'red'
+
+        if (vulnerabilities.high > 0) return 'orange'
+
+        return 'blue'
+      },
       label,
     })
   }
