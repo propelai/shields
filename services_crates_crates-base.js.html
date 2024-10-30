@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: core/service-test-runner/runner.js</title>
+    <title>JSDoc: Source: services/crates/crates-base.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: core/service-test-runner/runner.js</h1>
+    <h1 class="page-title">Source: services/crates/crates-base.js</h1>
 
     
 
@@ -26,82 +26,94 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @module
- */
+            <pre class="prettyprint source linenums"><code>import Joi from 'joi'
+import { nonNegativeInteger } from '../validators.js'
+import { BaseJsonService, InvalidResponse } from '../index.js'
 
-import { loadTesters } from '../base-service/loader.js'
+const versionSchema = Joi.object({
+  downloads: nonNegativeInteger,
+  // Crate size is not available for all versions.
+  crate_size: nonNegativeInteger.allow(null),
+  num: Joi.string().required(),
+  license: Joi.string().required().allow(null),
+  rust_version: Joi.string().allow(null),
+})
 
-/**
- * Load a collection of ServiceTester objects and register them with Mocha.
- */
-class Runner {
-  constructor({ baseUrl, skipIntercepted, retry }) {
-    this.baseUrl = baseUrl
-    this.skipIntercepted = skipIntercepted
-    this.retry = retry
-  }
+const crateResponseSchema = Joi.object({
+  crate: Joi.object({
+    downloads: nonNegativeInteger,
+    recent_downloads: nonNegativeInteger.allow(null),
+    max_version: Joi.string().required(),
+  }).required(),
+  versions: Joi.array().items(versionSchema).min(1).required(),
+}).required()
 
-  /**
-   * Function to invoke before each test. This is a stub which can be
-   * overridden on instances.
-   */
-  beforeEach() {}
+const versionResponseSchema = Joi.object({
+  version: versionSchema.required(),
+}).required()
 
-  /**
-   * Prepare the runner by loading up all the ServiceTester objects.
-   */
-  async prepare() {
-    this.testers = (await loadTesters()).flatMap(testerModule =>
-      Object.values(testerModule),
-    )
-    this.testers.forEach(tester => {
-      tester.beforeEach = () => {
-        this.beforeEach()
-      }
-    })
-  }
+const userStatsSchema = Joi.object({
+  total_downloads: nonNegativeInteger.required(),
+}).required()
 
-  _testersForService(service) {
-    return this.testers.filter(t => t.id.toLowerCase().startsWith(service))
-  }
+class BaseCratesService extends BaseJsonService {
+  static defaultBadgeData = { label: 'crates.io' }
 
   /**
-   * Limit the test run to the specified services.
+   * Fetches data from the crates.io API.
    *
-   * @param {string[]} services An array of service id prefixes to run
+   * @param {object} options - The options for the request
+   * @param {string} options.crate - The crate name.
+   * @param {string} [options.version] - The crate version number (optional).
+   * @returns {Promise&lt;object>} the JSON response from the API.
    */
-  only(services) {
-    const normalizedServices = new Set(services.map(v => v.toLowerCase()))
-
-    const missingServices = []
-    normalizedServices.forEach(service => {
-      const testers = this._testersForService(service)
-
-      if (testers.length === 0) {
-        missingServices.push(service)
-      }
-
-      testers.forEach(tester => {
-        tester.only()
-      })
-    })
-
-    // Throw at the end, to provide a better error message.
-    if (missingServices.length > 0) {
-      throw Error(`Unknown services: ${missingServices.join(', ')}`)
-    }
+  async fetch({ crate, version }) {
+    const url = version
+      ? `https://crates.io/api/v1/crates/${crate}/${version}`
+      : `https://crates.io/api/v1/crates/${crate}?include=versions,downloads`
+    const schema = version ? versionResponseSchema : crateResponseSchema
+    return this._requestJson({ schema, url })
   }
 
-  /**
-   * Register the tests with Mocha.
-   */
-  toss() {
-    const { testers, baseUrl, skipIntercepted, retry } = this
-    testers.forEach(tester => tester.toss({ baseUrl, skipIntercepted, retry }))
+  static getLatestVersion(response) {
+    return response.crate.max_stable_version
+      ? response.crate.max_stable_version
+      : response.crate.max_version
+  }
+
+  static getVersionObj(response) {
+    if (response.crate) {
+      const version = this.getLatestVersion(response)
+      const versionObj = response.versions.find(v => v.num === version)
+      if (versionObj === undefined) {
+        throw new InvalidResponse({ prettyMessage: 'version not found' })
+      }
+      return versionObj
+    }
+    return response.version
   }
 }
-export default Runner
+
+class BaseCratesUserService extends BaseJsonService {
+  static defaultBadgeData = { label: 'crates.io' }
+
+  /**
+   * Fetches data from the crates.io API.
+   *
+   * @param {object} options - The options for the request
+   * @param {string} options.userId - The user ID.
+   * @returns {Promise&lt;object>} the JSON response from the API.
+   */
+  async fetch({ userId }) {
+    const url = `https://crates.io/api/v1/users/${userId}/stats`
+    return this._requestJson({ schema: userStatsSchema, url })
+  }
+}
+
+const description =
+  '[Crates.io](https://crates.io/) is a package registry for Rust.'
+
+export { BaseCratesService, BaseCratesUserService, description }
 </code></pre>
         </article>
     </section>
