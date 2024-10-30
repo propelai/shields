@@ -11,18 +11,17 @@ const queryParamSchema = Joi.object({
   url: optionalUrl.required(),
 }).required()
 
-const description = `<p>
-  Using the endpoint badge, you can provide content for a badge through
-  a JSON endpoint. The content can be prerendered, or generated on the
-  fly. To strike a balance between responsiveness and bandwidth
-  utilization on one hand, and freshness on the other, cache behavior is
-  configurable, subject to the Shields minimum. The endpoint URL is
-  provided to Shields through the query string. Shields fetches it and
-  formats the badge.
-</p>
-<p>
-  The endpoint badge takes a single required query param: <code>url</code>, which is the URL to your JSON endpoint
-</p>
+const description = `
+Using the endpoint badge, you can provide content for a badge through
+a JSON endpoint. The content can be prerendered, or generated on the
+fly. To strike a balance between responsiveness and bandwidth
+utilization on one hand, and freshness on the other, cache behavior is
+configurable, subject to the Shields minimum. The endpoint URL is
+provided to Shields through the query string. Shields fetches it and
+formats the badge.
+
+The endpoint badge takes a single required query param: <code>url</code>, which is the URL to your JSON endpoint
+
 <div>
   <h2>Example JSON Endpoint Response</h2>
   <code>&#123; "schemaVersion": 1, "label": "hello", "message": "sweet world", "color": "orange" &#125;</code>
@@ -78,8 +77,8 @@ const description = `<p>
       <tr>
         <td><code>namedLogo</code></td>
         <td>
-          Default: none. One of the named logos supported by Shields
-          or <a href="https://simpleicons.org/">simple-icons</a>. Can be
+          Default: none. One of the
+		  <a href="https://simpleicons.org/">simple-icons</a> slugs. Can be
           overridden by the query string.
         </td>
       </tr>
@@ -91,20 +90,11 @@ const description = `<p>
         <td><code>logoColor</code></td>
         <td>
           Default: none. Same meaning as the query string. Can be overridden by
-          the query string. Only works for named logos and Shields logos. If you
-          override the color of a multicolor Shield logo, the corresponding
-          named logo will be used and colored.
+          the query string. Only works for simple-icons logos.
         </td>
       </tr>
       <tr>
         <td><code>logoWidth</code></td>
-        <td>
-          Default: none. Same meaning as the query string. Can be overridden by
-          the query string.
-        </td>
-      </tr>
-      <tr>
-        <td><code>logoPosition</code></td>
         <td>
           Default: none. Same meaning as the query string. Can be overridden by
           the query string.
@@ -158,7 +148,6 @@ export default class Endpoint extends BaseJsonService {
     logoSvg,
     logoColor,
     logoWidth,
-    logoPosition,
     style,
     cacheSeconds,
   }) {
@@ -172,7 +161,6 @@ export default class Endpoint extends BaseJsonService {
       logoSvg,
       logoColor,
       logoWidth,
-      logoPosition,
       style,
       // don't allow the user to set cacheSeconds any shorter than this._cacheLength
       cacheSeconds: Math.max(

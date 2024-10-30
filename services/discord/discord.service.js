@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import { nonNegativeInteger } from '../validators.js'
+import { metric } from '../text-formatters.js'
 import { BaseJsonService, pathParams } from '../index.js'
 
 const schema = Joi.object({
@@ -7,19 +8,17 @@ const schema = Joi.object({
 }).required()
 
 const description = `
-<p>
-  The Discord badge requires the <code>SERVER ID</code> in order access the Discord JSON API.
-</p>
-<p>
-  The <code>SERVER ID</code> can be located in the url of the channel that the badge is accessing.
-</p>
+The Discord badge requires the <code>SERVER ID</code> in order access the Discord JSON API.
+
+The <code>SERVER ID</code> can be located in the url of the channel that the badge is accessing.
+
 <img
   src="https://user-images.githubusercontent.com/6025893/39329897-b08f8290-4997-11e8-8f8f-7b85ff61882f.png"
   alt="SERVER ID is after the channel part at the end of the url" />
-<p>
-  To use the Discord badge a Discord server admin must enable the widget setting on the server.
-</p>
-<iframe src="https://player.vimeo.com/video/364220040" width="640" height="210" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
+To use the Discord badge a Discord server admin must enable the widget setting on the server.
+
+<iframe src="https://player.vimeo.com/video/364220040" width="640" height="210" frameBorder="0" allow="autoplay; fullscreen" allowFullScreen></iframe>
 `
 
 export default class Discord extends BaseJsonService {
@@ -43,7 +42,7 @@ export default class Discord extends BaseJsonService {
         description,
         parameters: pathParams({
           name: 'serverId',
-          example: '102860784329052160',
+          example: '308323056592486420',
         }),
       },
     },
@@ -55,7 +54,7 @@ export default class Discord extends BaseJsonService {
 
   static render({ members }) {
     return {
-      message: `${members} online`,
+      message: `${metric(members)} online`,
       color: 'brightgreen',
     }
   }

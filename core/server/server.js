@@ -143,6 +143,9 @@ const publicConfigSchema = Joi.object({
     nexus: defaultService,
     npm: defaultService,
     obs: defaultService,
+    pypi: {
+      baseUri: requiredUrl,
+    },
     sonar: defaultService,
     teamcity: defaultService,
     weblate: defaultService,
@@ -169,6 +172,8 @@ const privateConfigSchema = Joi.object({
   azure_devops_token: Joi.string(),
   curseforge_api_key: Joi.string(),
   discord_bot_token: Joi.string(),
+  dockerhub_username: Joi.string(),
+  dockerhub_pat: Joi.string(),
   drone_token: Joi.string(),
   gh_client_id: Joi.string(),
   gh_client_secret: Joi.string(),
@@ -202,7 +207,6 @@ const privateConfigSchema = Joi.object({
   teamcity_pass: Joi.string(),
   twitch_client_id: Joi.string(),
   twitch_client_secret: Joi.string(),
-  wheelmap_token: Joi.string(),
   influx_username: Joi.string(),
   influx_password: Joi.string(),
   weblate_api_key: Joi.string(),
@@ -540,9 +544,12 @@ class Server {
       }
     }
 
-    // https://github.com/badges/shields/issues/3273
     camp.handle((req, res, next) => {
+      // https://github.com/badges/shields/issues/3273
       res.setHeader('Access-Control-Allow-Origin', '*')
+      // https://github.com/badges/shields/issues/10419
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+
       next()
     })
 
