@@ -1,10 +1,8 @@
 // (1)
 import Joi from 'joi'
-import configModule from 'config'
 import { renderVersionBadge } from '../version.js'
-import { BaseJsonService } from '../index.js'
-
-const config = configModule.util.toObject()
+import { BaseJsonService, pathParams } from '../index.js'
+import config from 'config'
 
 const schema = Joi.object({
   image: Joi.string().required(),
@@ -18,20 +16,6 @@ const schema = Joi.object({
   }),
 }).required()
 
-const documentation = `
-<p>
-  This badge works with Metadata Hub to display the image tag of a container running in a pod in a Kubernetes cluster.
-</p>
-
-
-<p>
-  <b>Note:</b><br>
-  1. Parameter <code>project</code> accepts a unique workload name. It should be what you set using the pod label <code>metadata.nosidelines.io/name</code><br>
-  2. Parameter <code>environment</code> accepts the GCP project name.<br>
-  3. Parameter <code>container</code> accepts the container name inside the pod.<br>
-</p>
-`
-
 // (2)
 export default class MetadataHubImage extends BaseJsonService {
   // (3)
@@ -43,32 +27,23 @@ export default class MetadataHubImage extends BaseJsonService {
     pattern: ':environment/:project/:container',
   }
 
-  static examples = [
-    {
-      title: 'Metadata Hub (Image)',
-      namedParams: {
-        project: 'metadata-hub',
-        environment: 'nosidelines',
-        container: 'metadata-hub',
+  static openApi = {
+    '/metadata/image/{environment}/{project}/{container}': {
+      get: {
+        summary: 'Metadata Hub (Image)',
+        parameters: [
+          ...pathParams(
+            { name: 'environment', example: 'nosidelines' },
+            { name: 'project', example: 'metadata-hub' },
+            { name: 'container', example: 'metadata-hub' },
+          ),
+        ],
       },
-      staticPreview: this.render({
-        version: 'gcr.io/nosidelines/metadata-hub:0.0.0',
-      }),
-      documentation,
     },
-  ]
+  }
 
   // (7)
   static defaultBadgeData = { label: 'kubernetes' }
-
-  // (10)
-  static render({ label, version, versionFormatter }) {
-    return renderVersionBadge({
-      defaultLabel: label,
-      version,
-      versionFormatter,
-    })
-  }
 
   // (9)
   async fetch({ environment, container, project }) {
@@ -85,7 +60,8 @@ export default class MetadataHubImage extends BaseJsonService {
       container,
       project,
     })
-    return this.constructor.render({
+    return renderVersionBadge({
+      defaultLabel: label,
       version: image,
       versionFormatter: () => {
         if (vulnerabilities.critical > 0) return 'red'
@@ -94,7 +70,6 @@ export default class MetadataHubImage extends BaseJsonService {
 
         return 'blue'
       },
-      label,
     })
   }
 }
