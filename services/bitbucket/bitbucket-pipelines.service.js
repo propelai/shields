@@ -1,6 +1,11 @@
 import Joi from 'joi'
 import { renderBuildStatusBadge } from '../build-status.js'
-import { BaseJsonService, redirector, pathParams } from '../index.js'
+import {
+  BaseJsonService,
+  redirector,
+  pathParams,
+  InvalidResponse,
+} from '../index.js'
 
 const bitbucketPipelinesSchema = Joi.object({
   values: Joi.array()
@@ -16,7 +21,7 @@ const bitbucketPipelinesSchema = Joi.object({
               'STOPPED',
               'EXPIRED',
             ),
-          }).required(),
+          }),
         }).required(),
       }),
     )
@@ -37,15 +42,15 @@ class BitbucketPipelines extends BaseJsonService {
         parameters: pathParams(
           {
             name: 'user',
-            example: 'atlassian',
+            example: 'shields-io',
           },
           {
             name: 'repo',
-            example: 'adf-builder-javascript',
+            example: 'test-repo',
           },
           {
             name: 'branch',
-            example: 'task/SECO-2168',
+            example: 'main',
           },
         ),
       },
@@ -82,6 +87,9 @@ class BitbucketPipelines extends BaseJsonService {
       value => value.state && value.state.name === 'COMPLETED',
     )
     if (values.length > 0) {
+      if (!values[0].state?.result?.name) {
+        throw new InvalidResponse({ prettyMessage: 'invalid response data' })
+      }
       return values[0].state.result.name
     }
     return 'never built'

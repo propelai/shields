@@ -35,6 +35,8 @@ public:
       authorizedOrigins: 'BITBUCKET_SERVER_ORIGINS'
     drone:
       authorizedOrigins: 'DRONE_ORIGINS'
+    gitea:
+      authorizedOrigins: 'GITEA_ORIGINS'
     github:
       baseUri: 'GITHUB_URL'
       debug:
@@ -52,6 +54,8 @@ public:
       authorizedOrigins: 'NPM_ORIGINS'
     obs:
       authorizedOrigins: 'OBS_ORIGINS'
+    pypi:
+      baseUri: 'PYPI_URL'
     sonar:
       authorizedOrigins: 'SONAR_ORIGINS'
     teamcity:
@@ -79,7 +83,10 @@ private:
   bitbucket_server_password: 'BITBUCKET_SERVER_PASS'
   curseforge_api_key: 'CURSEFORGE_API_KEY'
   discord_bot_token: 'DISCORD_BOT_TOKEN'
+  dockerhub_username: 'DOCKERHUB_USER'
+  dockerhub_pat: 'DOCKERHUB_PAT'
   drone_token: 'DRONE_TOKEN'
+  gitea_token: 'GITEA_TOKEN'
   gh_client_id: 'GH_CLIENT_ID'
   gh_client_secret: 'GH_CLIENT_SECRET'
   gh_token: 'GH_TOKEN'
@@ -107,7 +114,6 @@ private:
   teamcity_pass: 'TEAMCITY_PASS'
   twitch_client_id: 'TWITCH_CLIENT_ID'
   twitch_client_secret: 'TWITCH_CLIENT_SECRET'
-  wheelmap_token: 'WHEELMAP_TOKEN'
   influx_username: 'INFLUX_USERNAME'
   influx_password: 'INFLUX_PASSWORD'
   weblate_api_key: 'WEBLATE_API_KEY'

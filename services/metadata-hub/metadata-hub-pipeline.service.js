@@ -1,10 +1,8 @@
 // (1)
 import Joi from 'joi'
-import configModule from 'config'
+import config from 'config'
 import { renderBuildStatusBadge } from '../build-status.js'
-import { BaseJsonService } from '../index.js'
-
-const config = configModule.util.toObject()
+import { BaseJsonService, pathParams } from '../index.js'
 
 const schema = Joi.object({
   pipeline_name: Joi.string().required(),
@@ -14,19 +12,6 @@ const schema = Joi.object({
   pipelinerun_url: Joi.string().required(),
   status: Joi.string().required(),
 }).required()
-
-const documentation = `
-<p>
-  This badge works with Metadata Hub to display the status of the last Tekton PipelineRun.
-</p>
-
-
-<p>
-  <b>Note:</b><br>
-  1. Parameter <code>project</code> accepts a unique workload name.
-  2. Parameter <code>type</code> accepts the Tekton pipeline type, which is one of publish, test, and scan<br>
-</p>
-`
 
 // (2)
 export default class MetadataHubPipeline extends BaseJsonService {
@@ -39,31 +24,22 @@ export default class MetadataHubPipeline extends BaseJsonService {
     pattern: ':project/:type',
   }
 
-  static examples = [
-    {
-      title: 'Metadata Hub (Pipeline)',
-      namedParams: {
-        project: 'metadata-hub',
-        type: 'test',
+  static openApi = {
+    '/metadata/pipeline/{project}/{type}': {
+      get: {
+        summary: 'Metadata Hub (Pipelines)',
+        parameters: [
+          ...pathParams(
+            { name: 'project', example: 'metadata-hub' },
+            { name: 'type', example: 'type' },
+          ),
+        ],
       },
-      staticPreview: this.render({
-        status: 'passed',
-        label: 'tekton',
-      }),
-      documentation,
     },
-  ]
+  }
 
   // (7)
   static defaultBadgeData = { label: 'tekton' }
-
-  // (10)
-  static render({ label, status }) {
-    return renderBuildStatusBadge({
-      label,
-      status,
-    })
-  }
 
   // (9)
   async fetch({ project, type }) {
@@ -78,7 +54,7 @@ export default class MetadataHubPipeline extends BaseJsonService {
     const { status } = await this.fetch({ project, type })
 
     console.log(status)
-    return this.constructor.render({
+    return renderBuildStatusBadge({
       status: status.toLowerCase(),
       label,
     })

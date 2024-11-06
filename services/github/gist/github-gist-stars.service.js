@@ -21,8 +21,8 @@ const schema = Joi.object({
 }).required()
 
 const description = `${commonDocumentation}
-<p>This badge shows the number of stargazers for a gist. Gist id is accepted as input and 'gist not found' is returned if the gist is not found for the given gist id.
-</p>`
+
+This badge shows the number of stargazers for a gist. Gist id is accepted as input and 'gist not found' is returned if the gist is not found for the given gist id.`
 
 export default class GistStars extends GithubAuthV4Service {
   static category = 'social'
@@ -35,7 +35,7 @@ export default class GistStars extends GithubAuthV4Service {
   static openApi = {
     '/github/gist/stars/{gistId}': {
       get: {
-        summary: 'Github Gist stars',
+        summary: 'GitHub Gist stars',
         description,
         parameters: pathParams({
           name: 'gistId',
@@ -52,7 +52,11 @@ export default class GistStars extends GithubAuthV4Service {
   }
 
   static render({ stargazerCount, url, stargazers }) {
-    return { message: metric(stargazerCount), link: [url, stargazers] }
+    return {
+      message: metric(stargazerCount),
+      style: 'social',
+      link: [url, stargazers],
+    }
   }
 
   async fetch({ gistId }) {
